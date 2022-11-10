@@ -1,7 +1,184 @@
 <template>
-  <Tutorial/>
+  <div v-if="currentQuestion" class="index">
+    <div
+      class="bg-lontong min-h-[200px] sm:min-h-[250px] md:min-h-[300px] relative"
+    >
+      <div class="question-box">
+        <p class="uppercase">{{ currentQuestion.question }}</p>
+      </div>
+      <button type="button" class="btn-help" @click="handleHelp">
+        BANTUAN
+      </button>
+    </div>
+    <div class="bg-black p-5">
+      <div class="flex flex-row justify-center items-center">
+        <v-otp-input
+          ref="answerInput"
+          v-model="currentValues"
+          :num-inputs="currentQuestion.answer.length"
+          :should-auto-focus="true"
+          @on-change="handleOnChange"
+          @on-complete="handleOnComplete"
+        />
+      </div>
+    </div>
+    <div class="bg-[#1F5F9C] h-[400px] relative">
+      <div v-if="isCompleted" class="reason-box">
+        <p class="uppercase">{{ currentQuestion.reason }}</p>
+      </div>
+      <div class="footer">
+        <button
+          v-if="arrQuestions.length - 1 !== index"
+          type="button"
+          class="btn-next"
+          @click="nextQuestion()"
+        >
+          {{ isCompleted ? 'LANJUT' : 'SKIP' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-export default {}
+import { QUESTIONS } from '../static/questions'
+import VOtpInput from '@/components/v-otp-input/index.vue'
+export default {
+  components: {
+    'v-otp-input': VOtpInput,
+  },
+  asyncData({ query }) {
+    const key = parseInt(query?.index) || 0
+    return {
+      index: key,
+      arrQuestions: QUESTIONS,
+      currentQuestion: QUESTIONS[key],
+    }
+  },
+  data: () => ({
+    isNext: false,
+    isCompleted: false,
+    currentValues: [],
+    currentQuestion: null,
+  }),
+  computed: {
+    query: (vm) => vm.$route.query.index,
+  },
+  watch: {
+    query(value) {
+      if (!this.isNext) this.index = this.index - 1
+      this.isCompleted = false
+      this.currentQuestion = QUESTIONS[value || 0]
+      this.setFirstValues()
+      this.isNext = false
+    },
+  },
+  mounted() {
+    this.setFirstValues()
+  },
+  methods: {
+    nextQuestion() {
+      this.isNext = true
+      this.index = this.index + 1
+      this.$router.push({
+        query: {
+          index: this.index,
+        },
+      })
+    },
+    setFirstValues() {
+      this.currentValues = []
+      if (this.currentQuestion) {
+        const key = this.currentQuestion.keyIndex
+        const answerSplit = this.currentQuestion.answer.split('')
+        const values = []
+        for (let i = 0; i < answerSplit.length; i++) {
+          if (i === key) values[i] = answerSplit[key]
+          else values[i] = undefined
+        }
+        this.currentValues = values
+      }
+    },
+    stringShuffle(value) {
+      const a = value.split('')
+      const n = a.length
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const tmp = a[i]
+        a[i] = a[j]
+        a[j] = tmp
+      }
+      return a.join('')
+    },
+    handleHelp() {
+      const keyTemp = []
+      for (let i = 0; i < this.currentValues.length; i++) {
+        if (!this.currentValues[i]) keyTemp.push(i)
+      }
+      const key = parseInt(this.stringShuffle(keyTemp.join('')).charAt(0))
+      const answerSplit = this.currentQuestion.answer.split('')
+      const values = [...this.currentValues]
+      for (let i = 0; i < answerSplit.length; i++) {
+        if (i === key) values[i] = answerSplit[key]
+      }
+      this.currentValues = values
+    },
+    handleOnComplete(value) {
+      if (value.toLowerCase() === this.currentQuestion.answer) {
+        this.isCompleted = true
+        this.handleSound('benar')
+      } else {
+        this.isCompleted = false
+        this.handleSound('salah')
+      }
+    },
+
+    handleSound(type) {
+      const audio = new Audio(`/sound/${type}.mp3`)
+      // audio.play()
+      // // audio.muted = false;
+      const promise = audio.play()
+      promise
+        .then(() => {
+          // Autoplay started!
+          console.log('sound loaded')
+        })
+        .catch((error) => {
+          console.log('sound error', error)
+          audio.muted = false
+          // Autoplay was prevented.
+          // Show a "Play" button so that user can start playback.
+        })
+    },
+    handleOnChange(value) {
+      this.isCompleted = false
+    },
+  },
+}
 </script>
+
+<style lang="scss">
+.footer {
+  @apply flex justify-end py-3 px-4 bg-[#213760] fixed w-full md:w-[640px] bottom-0;
+}
+.btn-help {
+  @apply shadow-md px-6 py-2 absolute right-0 bottom-0 text-white font-bold;
+  background: rgb(36 79 255 / 80%);
+}
+.btn-next {
+  @apply shadow-md rounded px-6 py-1 bg-[#f59e0b] text-white font-bold;
+}
+.question-box {
+  @apply absolute w-3/4 mt-10 left-0 right-0 mx-auto rounded-md p-5 text-lg;
+  background: rgba(255, 255, 255, 0.8);
+}
+.reason-box {
+  @apply w-3/4 mx-auto mt-10 absolute left-0 right-0 rounded-md p-5 text-lg;
+  background: rgba(255, 255, 255, 0.8);
+}
+.bg-lontong {
+  background-image: url('/img/bg-lontong.jpg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+</style>
