@@ -13,7 +13,7 @@ const QUESTIONS = [
   },
   {
     question: 'Hewan pemakan rumput, biasa dipotong dan dijadikan sate...',
-    answer: 'Kasihan',
+    answer: 'kasihan',
     keyIndex: 0,
     reason: 'kasihan kan udah makan rumput dijadikan sate lagi',
   },

@@ -23,7 +23,10 @@
       </div>
     </div>
     <div class="bg-[#1F5F9C] h-[400px] relative">
-      <div v-if="isCompleted" class="reason-box">
+      <div v-if="isWrong" class="reason-box">
+        <p class="uppercase text-center">kurang tepat, coba lagi!!</p>
+      </div>
+      <div v-else-if="isCompleted" class="reason-box">
         <p class="uppercase">{{ currentQuestion.reason }}</p>
       </div>
       <div class="footer">
@@ -33,7 +36,7 @@
           class="btn-next"
           @click="nextQuestion()"
         >
-          {{ isCompleted ? 'LANJUT' : 'SKIP' }}
+          {{ isCompleted ? 'LANJUT' : 'LEWATI' }}
         </button>
       </div>
     </div>
@@ -57,6 +60,7 @@ export default {
   },
   data: () => ({
     isNext: false,
+    isWrong: false,
     isCompleted: false,
     currentValues: [],
     currentQuestion: null,
@@ -67,6 +71,7 @@ export default {
   watch: {
     query(value) {
       if (!this.isNext) this.index = this.index - 1
+      this.isWrong = false
       this.isCompleted = false
       this.currentQuestion = QUESTIONS[value || 0]
       this.setFirstValues()
@@ -125,9 +130,11 @@ export default {
     },
     handleOnComplete(value) {
       if (value.toLowerCase() === this.currentQuestion.answer) {
+        this.isWrong = false
         this.isCompleted = true
         this.handleSound('benar')
       } else {
+        this.isWrong = true
         this.isCompleted = false
         this.handleSound('salah')
       }
@@ -150,7 +157,8 @@ export default {
           // Show a "Play" button so that user can start playback.
         })
     },
-    handleOnChange(value) {
+    handleOnChange() {
+      this.isWrong = false
       this.isCompleted = false
     },
   },
