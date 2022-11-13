@@ -6,7 +6,7 @@
       <div class="question-box">
         <p class="uppercase">{{ currentQuestion.question }}</p>
       </div>
-      <button type="button" class="btn-help" @click="handleHelp">
+      <button type="button" class="btn btn-help" @click="handleHelp">
         BANTUAN
       </button>
     </div>
@@ -30,10 +30,13 @@
         <p class="uppercase">{{ currentQuestion.reason }}</p>
       </div>
       <div class="footer">
+        <button type="button" class="btn btn-reset" @click="reset()">
+          <img src="/img/reset.svg" alt="" />
+        </button>
         <button
           v-if="arrQuestions.length - 1 !== index"
           type="button"
-          class="btn-next"
+          class="btn btn-next"
           @click="nextQuestion()"
         >
           {{ isCompleted ? 'LANJUT' : 'LEWATI' }}
@@ -70,6 +73,7 @@ export default {
   },
   watch: {
     query(value) {
+      if (!value) this.index = 1
       if (!this.isNext) this.index = this.index - 1
       this.isWrong = false
       this.isCompleted = false
@@ -82,6 +86,11 @@ export default {
     this.setFirstValues()
   },
   methods: {
+    reset() {
+      this.isWrong = false
+      this.isCompleted = false
+      this.setFirstValues()
+    },
     nextQuestion() {
       this.isNext = true
       this.index = this.index + 1
@@ -167,14 +176,20 @@ export default {
 
 <style lang="scss">
 .footer {
-  @apply flex justify-end py-3 px-4 bg-[#213760] fixed w-full md:w-[640px] bottom-0;
+  @apply flex justify-between py-3 px-4 bg-[#213760] fixed w-full md:w-[640px] bottom-0;
 }
-.btn-help {
-  @apply shadow-md px-6 py-2 absolute right-0 bottom-0 text-white font-bold;
-  background: rgb(36 79 255 / 80%);
-}
-.btn-next {
-  @apply shadow-md rounded px-6 py-1 bg-[#f59e0b] text-white font-bold;
+.btn {
+  @apply shadow-md px-6  text-white font-bold;
+  &-help {
+    @apply py-2 absolute right-0 bottom-0;
+    background: rgb(36 79 255 / 80%);
+  }
+  &-next {
+    @apply py-1 bg-[#f59e0b];
+  }
+  &-reset {
+    @apply py-1 px-3 bg-[#707070];
+  }
 }
 .question-box {
   @apply absolute w-3/4 mt-10 left-0 right-0 mx-auto rounded-md p-5 text-lg;

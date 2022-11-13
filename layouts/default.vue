@@ -1,7 +1,7 @@
 <template>
   <div class="l-default">
     <header>
-      <p>TEKA TEKI SULIT</p>
+      <router-link to="/">TEKA TEKI SULIT</router-link>
     </header>
     <nuxt />
   </div>
