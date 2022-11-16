@@ -1,46 +1,67 @@
 <template>
-  <div v-if="currentQuestion" class="index">
+  <div class="index">
     <div
-      class="bg-lontong min-h-[200px] sm:min-h-[250px] md:min-h-[300px] relative"
+      v-if="isFirstOpened"
+      style="height: calc(100vh - 100px)"
+      class="welcome"
     >
-      <div class="question-box">
-        <p class="uppercase">{{ currentQuestion.question }}</p>
-      </div>
-      <button type="button" class="btn btn-help" @click="handleHelp">
-        BANTUAN
-      </button>
-    </div>
-    <div class="bg-black p-5">
-      <div class="flex flex-row justify-center items-center">
-        <v-otp-input
-          ref="answerInput"
-          v-model="currentValues"
-          :num-inputs="currentQuestion.answer.length"
-          :should-auto-focus="true"
-          @on-change="handleOnChange"
-          @on-complete="handleOnComplete"
-        />
-      </div>
-    </div>
-    <div class="bg-[#1F5F9C] h-[400px] relative">
-      <div v-if="isWrong" class="reason-box">
-        <p class="uppercase text-center">kurang tepat, coba lagi!!</p>
-      </div>
-      <div v-else-if="isCompleted" class="reason-box">
-        <p class="uppercase">{{ currentQuestion.reason }}</p>
-      </div>
-      <div class="footer">
-        <button type="button" class="btn btn-reset" @click="reset()">
-          <img src="/img/reset.svg" alt="" />
-        </button>
+      <div class="box">
+        <p class="mb-4">
+          Selamat datang di game Teka Teki Sulit. Jika anda merasa pusing, mual,
+          muntah, darah tinggi kami tidak bertanggung jawab.
+        </p>
         <button
-          v-if="arrQuestions.length - 1 !== index"
           type="button"
           class="btn btn-next"
-          @click="nextQuestion()"
+          @click="isFirstOpened = false"
         >
-          {{ isCompleted ? 'LANJUT' : 'LEWATI' }}
+          MULAI
         </button>
+      </div>
+    </div>
+    <div v-else-if="currentQuestion" class="index">
+      <div
+        class="bg-lontong min-h-[200px] sm:min-h-[250px] md:min-h-[300px] relative"
+      >
+        <div class="question-box">
+          <p class="uppercase">{{ currentQuestion.question }}</p>
+        </div>
+        <button type="button" class="btn btn-help" @click="handleHelp">
+          BANTUAN
+        </button>
+      </div>
+      <div class="bg-black p-5">
+        <div class="flex flex-row justify-center items-center">
+          <v-otp-input
+            ref="answerInput"
+            v-model="currentValues"
+            :num-inputs="currentQuestion.answer.length"
+            :should-auto-focus="true"
+            @on-change="handleOnChange"
+            @on-complete="handleOnComplete"
+          />
+        </div>
+      </div>
+      <div class="bg-[#1F5F9C] h-[400px] relative">
+        <div v-if="isWrong" class="reason-box">
+          <p class="uppercase text-center">kurang tepat, coba lagi!!</p>
+        </div>
+        <div v-else-if="isCompleted" class="reason-box">
+          <p class="uppercase">{{ currentQuestion.reason }}</p>
+        </div>
+        <div class="footer">
+          <button type="button" class="btn btn-reset" @click="reset()">
+            <img src="/img/reset.svg" alt="" />
+          </button>
+          <button
+            v-if="arrQuestions.length - 1 !== index"
+            type="button"
+            class="btn btn-next"
+            @click="nextQuestion()"
+          >
+            {{ isCompleted ? 'LANJUT' : 'LEWATI' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -57,11 +78,13 @@ export default {
     const key = parseInt(query?.index) || 0
     return {
       index: key,
+      isFirstOpened: !key,
       arrQuestions: QUESTIONS,
       currentQuestion: QUESTIONS[key],
     }
   },
   data: () => ({
+    isFirstOpened: true,
     isNext: false,
     isWrong: false,
     isCompleted: false,
@@ -175,6 +198,14 @@ export default {
 </script>
 
 <style lang="scss">
+.welcome {
+  @apply flex justify-center items-center bg-[#fafafa];
+  height: calc(100vh - 50px);
+  .box {
+    @apply border w-4/5 lg:w-3/5 text-center p-10 rounded-xl;
+    font-family: cursive;
+  }
+}
 .footer {
   @apply flex justify-between py-3 px-4 bg-[#213760] fixed w-full md:w-[640px] bottom-0;
 }
